@@ -20,8 +20,8 @@ namespace CollectData
             for (int waveInDevice = 0; waveInDevice < waveInDevices; waveInDevice++)
             {
                 WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(waveInDevice);
-                deviceInfo.ProductName.Contains(deviceName);
-                deviceNumber = waveInDevice;
+                if (deviceInfo.ProductName.Contains(deviceName))
+                    deviceNumber = waveInDevice;
             }
 
             if (deviceNumber == -1)
