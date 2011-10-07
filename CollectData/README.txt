@@ -15,3 +15,5 @@ Running
 2.Specify COM number of bluetooth GPS device
 3.Hit Start & stop for length of data collection
 4.Each time you want to collect, re-start from Step 1
+
+Data collected can be found in separate folders in CollectData\CollectData\bin\Release
