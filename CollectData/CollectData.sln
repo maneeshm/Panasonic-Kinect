@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectData", "CollectData\CollectData.csproj", "{290C7EF1-E05F-4054-8B33-28BA05596882}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{290C7EF1-E05F-4054-8B33-28BA05596882}.Debug|x86.ActiveCfg = Debug|x86
+		{290C7EF1-E05F-4054-8B33-28BA05596882}.Debug|x86.Build.0 = Debug|x86
+		{290C7EF1-E05F-4054-8B33-28BA05596882}.Release|x86.ActiveCfg = Release|x86
+		{290C7EF1-E05F-4054-8B33-28BA05596882}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
