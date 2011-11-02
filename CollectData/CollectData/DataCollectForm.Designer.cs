@@ -39,6 +39,7 @@
             this.headsetAudioCheckBox = new System.Windows.Forms.CheckBox();
             this.gpsCheckBox = new System.Windows.Forms.CheckBox();
             this.rawDepthCheckBox = new System.Windows.Forms.CheckBox();
+            this.phidgetsCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.preview)).BeginInit();
             this.SuspendLayout();
             // 
@@ -123,9 +124,7 @@
             // headsetAudioCheckBox
             // 
             this.headsetAudioCheckBox.AutoSize = true;
-            this.headsetAudioCheckBox.Checked = true;
-            this.headsetAudioCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.headsetAudioCheckBox.Location = new System.Drawing.Point(370, 221);
+            this.headsetAudioCheckBox.Location = new System.Drawing.Point(370, 225);
             this.headsetAudioCheckBox.Name = "headsetAudioCheckBox";
             this.headsetAudioCheckBox.Size = new System.Drawing.Size(96, 17);
             this.headsetAudioCheckBox.TabIndex = 11;
@@ -135,9 +134,7 @@
             // gpsCheckBox
             // 
             this.gpsCheckBox.AutoSize = true;
-            this.gpsCheckBox.Checked = true;
-            this.gpsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.gpsCheckBox.Location = new System.Drawing.Point(370, 244);
+            this.gpsCheckBox.Location = new System.Drawing.Point(370, 248);
             this.gpsCheckBox.Name = "gpsCheckBox";
             this.gpsCheckBox.Size = new System.Drawing.Size(48, 17);
             this.gpsCheckBox.TabIndex = 12;
@@ -149,18 +146,29 @@
             this.rawDepthCheckBox.AutoSize = true;
             this.rawDepthCheckBox.Checked = true;
             this.rawDepthCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.rawDepthCheckBox.Location = new System.Drawing.Point(370, 267);
+            this.rawDepthCheckBox.Location = new System.Drawing.Point(370, 271);
             this.rawDepthCheckBox.Name = "rawDepthCheckBox";
             this.rawDepthCheckBox.Size = new System.Drawing.Size(80, 17);
             this.rawDepthCheckBox.TabIndex = 13;
             this.rawDepthCheckBox.Text = "Raw Depth";
             this.rawDepthCheckBox.UseVisualStyleBackColor = true;
             // 
+            // phidgetsCheckBox
+            // 
+            this.phidgetsCheckBox.AutoSize = true;
+            this.phidgetsCheckBox.Location = new System.Drawing.Point(370, 202);
+            this.phidgetsCheckBox.Name = "phidgetsCheckBox";
+            this.phidgetsCheckBox.Size = new System.Drawing.Size(67, 17);
+            this.phidgetsCheckBox.TabIndex = 14;
+            this.phidgetsCheckBox.Text = "Phidgets";
+            this.phidgetsCheckBox.UseVisualStyleBackColor = true;
+            // 
             // DataCollectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(637, 300);
+            this.Controls.Add(this.phidgetsCheckBox);
             this.Controls.Add(this.rawDepthCheckBox);
             this.Controls.Add(this.gpsCheckBox);
             this.Controls.Add(this.headsetAudioCheckBox);
@@ -193,6 +201,7 @@
         private System.Windows.Forms.CheckBox headsetAudioCheckBox;
         private System.Windows.Forms.CheckBox gpsCheckBox;
         private System.Windows.Forms.CheckBox rawDepthCheckBox;
+        private System.Windows.Forms.CheckBox phidgetsCheckBox;
     }
 }
 

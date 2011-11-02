@@ -13,6 +13,8 @@ using Coding4Fun.Kinect.WinForm;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
+using Phidgets;
+using Phidgets.Events;
 
 namespace CollectData
 {
@@ -54,6 +56,11 @@ namespace CollectData
         private TextWriter tw;
         HeadsetAudio headsetAudio;
 
+        // Phidgets Sensor
+        private Boolean phidgets;
+        private Spatial spatial;
+        private TextWriter twPhidgetTimestamp;
+
         // Writer
         private TextWriter twColorTimestamp;
         private TextWriter twDepthTimestamp;
@@ -62,10 +69,12 @@ namespace CollectData
         {
             InitializeComponent();
             kinect.Initialize(RuntimeOptions.UseColor | RuntimeOptions.UseDepth);
+
         }
 
         private void StartButton_Click(object sender, EventArgs e)
         {
+            StartButton.Enabled = false;
             try
             {
                 recordLength = System.Convert.ToInt32(timeTextBox.Text.ToString());
@@ -87,6 +96,35 @@ namespace CollectData
             prefix = CurrTime.ToString(format);
             String newPath = System.IO.Path.Combine(prefix);
             System.IO.Directory.CreateDirectory(newPath);
+
+            // Phidgets Sensor
+            phidgets = phidgetsCheckBox.Checked;
+            if (phidgets)
+            {
+                // Phidgets Sensor
+                spatial = new Spatial();
+                //Hook the basic event handlers
+                spatial.Attach += new AttachEventHandler(accel_Attach);
+                spatial.Detach += new DetachEventHandler(accel_Detach);
+                spatial.Error += new Phidgets.Events.ErrorEventHandler(accel_Error);
+
+                //hook the phidget specific event handlers
+                spatial.SpatialData += new SpatialDataEventHandler(spatial_SpatialData);
+
+                //open the acclerometer object for device connections
+                spatial.open();
+
+                //get the program to wait for an spatial device to be attached
+                messageTextBox.Text += "Waiting for spatial to be attached....";
+
+                spatial.waitForAttachment();
+
+                //Set the data rate so the events aren't crazy
+                spatial.DataRate = 496; //multiple of 8
+
+                String phidgetTimestamp = System.IO.Path.Combine(newPath, prefix + "-phidget.txt");
+                twPhidgetTimestamp = new StreamWriter(phidgetTimestamp);
+            }
 
             // GPS
             if (gpsCheckBox.Checked == true)
@@ -149,7 +187,6 @@ namespace CollectData
                 tw.Close();
             }
 
-
             this.startTime = DateTime.Now;
             messageTextBox.Text = "Started";
 
@@ -161,19 +198,6 @@ namespace CollectData
             //audioRecord = true;
             //recordAudioThread = new Thread(new ThreadStart(recordAudio));
             //recordAudioThread.Start();
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            int timeLeft = recordLength - recordCounter;
-            Time.Text = timeLeft.ToString();
-            if (timeLeft == 0)
-            {
-                this.timer.Tick -= this.timer_Tick;
-                stop();
-                return;
-            }
-            recordCounter++;
         }
 
         private void stop()
@@ -198,24 +222,89 @@ namespace CollectData
             {
                 aviDepthManager.Close();
             }
-            twColorTimestamp.Close();
-            twDepthTimestamp.Close();
+            if (phidgets)
+            {
+                spatial.SpatialData -= spatial_SpatialData;
+                spatial.Attach -= accel_Attach;
+                spatial.Detach -= accel_Detach;
+                spatial.Error -= accel_Error;
+
+                //spatial = null;
+                twPhidgetTimestamp.Flush();
+
+            }
+            twColorTimestamp.Flush();
+            twDepthTimestamp.Flush();
             messageTextBox.Text = "Done";
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            twColorTimestamp.Close();
+            twDepthTimestamp.Close();
+            twPhidgetTimestamp.Close();
             Environment.Exit(0);
         }
+
+        // Record Orientation
+
+        //spatial data handler - all spatial data tied together.
+        void spatial_SpatialData(object sender, SpatialDataEventArgs e)
+        {
+            CurrTime = DateTime.Now;
+            twPhidgetTimestamp.WriteLine(CurrTime.ToString("yyyy-MM-dd HH:mm:ss.fffffff"));
+            twPhidgetTimestamp.WriteLine("SpatialData event time:" + e.spatialData[0].Timestamp.TotalSeconds.ToString());
+            if (e.spatialData[0].Acceleration.Length > 0)
+                twPhidgetTimestamp.WriteLine(" Acceleration: " + e.spatialData[0].Acceleration[0] + ", " + e.spatialData[0].Acceleration[1] + ", " + e.spatialData[0].Acceleration[2]);
+            if (e.spatialData[0].AngularRate.Length > 0)
+                twPhidgetTimestamp.WriteLine(" Angular Rate: " + e.spatialData[0].AngularRate[0] + ", " + e.spatialData[0].AngularRate[1] + ", " + e.spatialData[0].AngularRate[2]);
+            if (e.spatialData[0].MagneticField.Length > 0)
+                twPhidgetTimestamp.WriteLine(" Magnetic Field: " + e.spatialData[0].MagneticField[0] + ", " + e.spatialData[0].MagneticField[1] + ", " + e.spatialData[0].MagneticField[2]);
+        }
+
+        //Attach event handler...Display the serial number of the attached 
+        //spatial to the console
+        void accel_Attach(object sender, AttachEventArgs e)
+        {
+            messageTextBox.Text += "Spatial " + e.Device.SerialNumber.ToString() + " attached!";
+        }
+
+        //Detach event handler...Display the serial number of the detached spatial
+        //to the console
+        void accel_Detach(object sender, DetachEventArgs e)
+        {
+            messageTextBox.Text += "Spatial " + e.Device.SerialNumber.ToString() + " detached!";
+        }
+
+        //Error event handler...Display the description of the error to the console
+        void accel_Error(object sender, Phidgets.Events.ErrorEventArgs e)
+        {
+            messageTextBox.Text += e.Description.ToString();
+        }
+
+        // timer
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            int timeLeft = recordLength - recordCounter;
+            Time.Text = timeLeft.ToString();
+            if (timeLeft == 0)
+            {
+                this.timer.Tick -= this.timer_Tick;
+                stop();
+                return;
+            }
+            recordCounter++;
+        }
+
 
         void kinect_VideoFrameReady(object sender, ImageFrameReadyEventArgs e)
         {
             CurrTime = DateTime.Now;
             twColorTimestamp.WriteLine(CurrTime.ToString("yyyy-MM-dd HH:mm:ss.fffffff"));
             Bitmap bitmap = e.ImageFrame.ToBitmap();
-            if(previewCheckBox.Checked == true)
+            if (previewCheckBox.Checked == true)
                 preview.Image = bitmap;
- 
+
             if (firstColorFrame)
             {
                 aviColerStream = aviColorManager.AddVideoStream(false, 30, bitmap);
@@ -277,8 +366,8 @@ namespace CollectData
         const int BLUE_IDX = 0;
         byte[] depthFrame32 = new byte[320 * 240 * 4];
 
-         //Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
-         //that displays different players in different colors
+        //Converts a 16-bit grayscale depth frame which includes player indexes into a 32-bit frame
+        //that displays different players in different colors
         byte[] convertDepthFrame(byte[] depthFrame16)
         {
             for (int i16 = 0, i32 = 0; i16 < depthFrame16.Length && i32 < depthFrame32.Length; i16 += 2, i32 += 4)
@@ -363,15 +452,15 @@ namespace CollectData
             {
                 int cbFormat = 18; //sizeof(WAVEFORMATEX)
                 WAVEFORMATEX format = new WAVEFORMATEX()
-                                          {
-                                              wFormatTag = 1,
-                                              nChannels = 1,
-                                              nSamplesPerSec = 16000,
-                                              nAvgBytesPerSec = 32000,
-                                              nBlockAlign = 2,
-                                              wBitsPerSample = 16,
-                                              cbSize = 0
-                                          };
+                {
+                    wFormatTag = 1,
+                    nChannels = 1,
+                    nSamplesPerSec = 16000,
+                    nAvgBytesPerSec = 32000,
+                    nBlockAlign = 2,
+                    wBitsPerSample = 16,
+                    cbSize = 0
+                };
 
                 using (var bw = new BinaryWriter(memStream))
                 {
